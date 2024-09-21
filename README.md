@@ -9,7 +9,7 @@ Open Projectcode.mlx file and we built an app using app designer . In the file o
 
 MIT License
 
-Copyright (c) 2024 Giresh001
+Copyright (c) 2024 MIKEPENCE10CENT
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
