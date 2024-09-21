@@ -1,0 +1,65 @@
+% Read the image
+image_path = "C:\Users\sonia\OneDrive\Desktop\Image Compression\1football.bmp"; % Update with your image path
+image = imread(image_path);
+
+% Convert to grayscale if necessary
+if size(image, 3) == 3
+    image = rgb2gray(image);
+end
+
+% Display original image
+figure;
+subplot(1, 5, 1);
+imshow(image);
+title('Original Image');
+
+% Define wavelets
+wavelets = {'haar'};
+compressed_images = cell(1, numel(wavelets));
+psnr_values = zeros(1, numel(wavelets));
+mse_values = zeros(1, numel(wavelets));
+
+for idx = 1:numel('haar')
+    % Perform DWT
+    [cA, cH, cV, cD] = dwt2(image, wavelets{idx});
+    
+    % Thresholding and compressing
+    threshold = 40; % Adjust threshold as desired
+    cH_thresholded = wthresh(double(cH), 's', threshold);
+    
+    % Perform IDWT to obtain compressed image
+    compressed_image = idwt2(cA, cH_thresholded, cV, cD, wavelets{idx});
+    compressed_images{idx} = uint8(compressed_image); % Ensure the result is uint8
+    
+    % Convert compressed image to the same class as the original image
+    compressed_image = cast(compressed_image, class(image));
+    
+    % Compute PSNR between the original and compressed images
+    mse = immse(image, compressed_image);
+    max_pixel = double(max(image(:)));
+    psnr_value = 10 * log10(max_pixel^2 / mse); % Calculate PSNR in dB
+    psnr_values(idx) = psnr_value;
+    
+    % Compute MSE between the original and compressed images
+    mse_values(idx) = mse;
+    
+    % Display the horizontal detail coefficient
+    subplot(3, numel(wavelets), idx + numel(wavelets));
+    imshow(cH_thresholded, []);
+    title(sprintf('Horizontal Detail Coefficient (%s)', wavelets{idx}));
+    
+    % Display the approximation coefficient
+    subplot(3, numel(wavelets), idx + 2*numel(wavelets));
+    imshow(cA, []);
+    title(sprintf('Approximation Coefficient (%s)', wavelets{idx}));
+end
+
+% Display compressed images and PSNR/MSE values
+for idx = 1:numel(wavelets)
+    subplot(3, numel(wavelets), idx);
+    imshow(compressed_images{idx});
+    title(sprintf('Compressed Image (%s)\nPSNR: %.2f dB\nMSE: %.2f', ...
+        wavelets{idx}, psnr_values(idx), mse_values(idx)));
+end
+
+
